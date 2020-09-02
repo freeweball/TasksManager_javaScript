@@ -1,6 +1,6 @@
 const createSiteMenuTemplate = () => {
     return (
-        <section class="control__btn-wrap">
+        `<section class="control__btn-wrap">
           <input
             type="radio"
             name="control"
@@ -27,7 +27,7 @@ const createSiteMenuTemplate = () => {
           <label for="control__statistic" class="control__label"
             >STATISTICS</label
           >
-        </section>
+        </section>`
     );
 };
 
