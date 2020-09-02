@@ -28,5 +28,9 @@ const createSiteMenuTemplate = () => {
             >STATISTICS</label
           >
         </section>
-    )
-}
+    );
+};
+
+const render = (container, template, place) => {
+    container.insertAjacentHTML(place, template);
+};
