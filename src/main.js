@@ -1,3 +1,5 @@
+const TASK_COUNT = 3;
+
 const createSiteMenuTemplate = () => {
     return (
         `<section class="control__btn-wrap">
@@ -380,8 +382,8 @@ const taskListElement = boardElement.querySelector(`.board__tasks`);
 
 render(taskListElement, createTaskEditTemplate());
 
-render(taskListElement, createTaskTemplate());
-render(taskListElement, createTaskTemplate());
-render(taskListElement, createTaskTemplate());
+for (let i = 0; i < TASK_COUNT; i++) {
+  render(taskListElement, createTaskTemplate());
+};
 
 render(boardElement, createLoadMoreButtonTemplate());
