@@ -10,31 +10,47 @@ const isExpired = (duedate) => {
   return currentDate.getTime() > dueDate.getTime();
 };
 
-export const createTaskTemplate = (task) => {
-  const {color, description, duedate} = task;
+const isRepeating = (repeating) => {
+  return Object.values(repeating).some(Boolean);
+};
 
-  const date = dueDate !== null
-    ? duedate.toLocaleString(`en-US`, {day: `numeric`, month: `long`})
-    : ``;
+export const createTaskTemplate = (task) => {
+  const {color, description, duedate, repeating, isArchive, isFavorite} = task;
+
+    const date = dueDate !== null
+      ? duedate.toLocaleString(`en-US`, {day: `numeric`, month: `long`})
+      : ``;
   
     const deadlineClassName = isExpired(dueDate)
       ? `card--deadline`
       : ``;
+
+    const repeatClassName = isRepeating(repeating)
+      ? `card--repeat`
+      : ``;
+
+    const arhiveClassName = isArchive
+      ? `card__btn--archive card__btn--disabled`
+      : `card__btn--archive`;
+
+    const favoriteClassName = isFavorite
+      ? `card__btn--favorites card__btn--disabled`
+      : `card__btn--favorites`;
     
     return (
-      `<article class="card card--${color} ${deadlineClassName}">
+      `<article class="card card--${color} ${deadlineClassName} ${repeatClassName}">
         <div class="card__form">
           <div class="card__inner">
             <div class="card__control">
               <button type="button" class="card__btn card__btn--edit">
                 edit
               </button>
-              <button type="button" class="card__btn card__btn--archive">
+              <button type="button" class="card__btn ${arhiveClassName}">
                 archive
               </button>
               <button
                 type="button"
-                class="card__btn card__btn--favorites"
+                class="card__btn ${favoriteClassName}"
               >
                 favorites
               </button>
