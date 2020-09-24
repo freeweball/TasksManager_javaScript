@@ -1,4 +1,4 @@
-const isExpired = (duedate) => {
+const isExpired = (dueDate) => {
   if (dueDate === null) {
     return false;
   }
@@ -15,10 +15,10 @@ const isRepeating = (repeating) => {
 };
 
 export const createTaskTemplate = (task) => {
-  const {color, description, duedate, repeating, isArchive, isFavorite} = task;
+  const {color, description, dueDate, repeating, isArchive, isFavorite} = task;
 
     const date = dueDate !== null
-      ? duedate.toLocaleString(`en-US`, {day: `numeric`, month: `long`})
+      ? dueDate.toLocaleString(`en-US`, {day: `numeric`, month: `long`})
       : ``;
   
     const deadlineClassName = isExpired(dueDate)
