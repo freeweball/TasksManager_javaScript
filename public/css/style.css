@@ -148,6 +148,7 @@ body {
 }
 
 .board__filter {
+  position: relative;
   display: inline-block;
   margin-right: 24px;
   outline: none;
@@ -155,9 +156,25 @@ body {
   color: #000;
 }
 
-.board__filter:hover,
-.board__filter:focus {
-  opacity: 0.7;
+.board__filter::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+
+  display: inline-block;
+  width: 0;
+  height: 1px;
+
+  background-color: transparent;
+  transition: 0.5s;
+}
+
+.board__filter:hover.board__filter::before,
+.board__filter:focus.board__filter::before {
+  background-color: #000;
+  transform: translateX(-50%);
+  width: 100%;
 }
 
 .board__tasks {
@@ -183,6 +200,9 @@ body {
   cursor: pointer;
   margin-top: auto;
   outline: none;
+  border-radius: 10px;
+  transition: 0.5s;
+  border: none;
 }
 .load-more:hover {
   background-color: rgba(0, 0, 0, 0.1);
@@ -208,6 +228,7 @@ body {
   box-shadow: 0 9px 38px 0 rgba(0, 17, 45, 0.12);
   background-color: #ffffff;
   outline: 0;
+  border-radius: 10px;
 }
 .card--deadline .card__inner {
   box-shadow: 0 2px 38px 0 rgba(240, 0, 0, 0.19);
@@ -258,6 +279,7 @@ body {
   background-color: black;
   margin-bottom: 10px;
   stroke: #000000;
+  border-radius: 3px;
 }
 .card--black .card__color-bar {
   background-color: #000000;
