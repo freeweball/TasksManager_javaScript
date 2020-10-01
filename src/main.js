@@ -1,12 +1,14 @@
 import SiteMenuView from "./view/site-menu.js";
-import {createFilterTemplate} from "./view/filter.js";
-import {createBoardTemplate} from "./view/board.js";
-import {createTaskTemplate} from "./view/task.js";
-import {createTaskEditTemplate} from "./view/task-edit.js";
-import {createLoadMoreButtonTemplate} from "./view/load-more-button.js";
+import FilterView from "./view/filter.js";
+import TaskView from "./view/task.js";
+import TaskEditView from "./view/task-edit.js";
+import LoadMoreButtonView from "./view/load-more-button.js";
+import BoardView from "./view/board.js";
+import SortView from "./view/sort.js";
+import TaskListView from "./view/task-list.js";
 import {generateTask} from "./mock/task.js";
 import {generateFilter} from "./mock/filter.js";
-import {renderTemplate, renderElement, RenderPosition} from "./utils.js";
+import {renderTemplate, render, RenderPosition} from "./utils.js";
 
 const TASK_COUNT = 22;
 const TASK_COUNT_PER_STEP = 8;
@@ -17,36 +19,39 @@ const filters = generateFilter(tasks);
 const siteMainElement = document.querySelector(`.main`);
 const siteHeaderElement = siteMainElement.querySelector(`.main__control`);
 
-renderElement(siteHeaderElement, new SiteMenuView().getElement(), RenderPosition.BEFOREEND);
-renderTemplate(siteMainElement, createFilterTemplate(filters), `beforeend`);
-renderTemplate(siteMainElement, createBoardTemplate(), `beforeend`);
+render(siteHeaderElement, new SiteMenuView().getElement(), RenderPosition.BEFOREEND);
+render(siteMainElement, new FilterView(filters).getElement(), RenderPosition.BEFOREEND);
 
-const boardElement = siteMainElement.querySelector(`.board`);
-const taskListElement = boardElement.querySelector(`.board__tasks`);
+const boardComponent = new BoardView();
+render(siteMainElement, boardComponent.getElement(), RenderPosition.BEFOREEND);
+render(boardComponent.getElement(), new SortView().getElement(), RenderPosition.AFTERBEGIN);
 
-renderTemplate(taskListElement, createTaskEditTemplate(tasks[0]), `beforeend`);
+const taskListComponent = new TaskListView();
+render(boardComponent.getElement(), taskListComponent.getElement(), RenderPosition.BEFOREEND);
+render(taskListComponent.getElement(), new TaskEditView(tasks[0]).getElement(), RenderPosition.BEFOREEND);
 
 for (let i = 1; i < Math.min(tasks.length, TASK_COUNT_PER_STEP); i++) {
-  renderTemplate(taskListElement, createTaskTemplate(tasks[i]), `beforeend`);
-};
+  render(taskListComponent.getElement(), new TaskView(tasks[i]).getElement(), RenderPosition.BEFOREEND);
+}
 
 if (tasks.length > TASK_COUNT_PER_STEP) {
-  let renderTaskCount = TASK_COUNT_PER_STEP;
+  let renderedTaskCount = TASK_COUNT_PER_STEP;
 
-  renderTemplate(boardElement, createLoadMoreButtonTemplate(), `beforeend`);
+  const loadMoreButtonComponent = new LoadMoreButtonView();
 
-  const loadMoreButton = boardElement.querySelector(`.load-more`);
+  render(boardComponent.getElement(), loadMoreButtonComponent.getElement(), RenderPosition.BEFOREEND);
 
-  loadMoreButton.addEventListener(`click`, (evt) => {
+  loadMoreButtonComponent.getElement().addEventListener(`click`, (evt) => {
     evt.preventDefault();
     tasks
-      .slice(renderTaskCount, renderTaskCount + TASK_COUNT_PER_STEP)
-      .forEach((task) => renderTemplate(taskListElement, createTaskTemplate(task), `beforeend`));
+      .slice(renderedTaskCount, renderedTaskCount + TASK_COUNT_PER_STEP)
+      .forEach((task) => render(taskListComponent.getElement(), new TaskView(task).getElement(), RenderPosition.BEFOREEND));
 
-    renderTaskCount += TASK_COUNT_PER_STEP;
+    renderedTaskCount += TASK_COUNT_PER_STEP;
 
-    if (renderTaskCount >=tasks.length) {
-      loadMoreButton.remove();
+    if (renderedTaskCount >= tasks.length) {
+      loadMoreButtonComponent.getElement().remove();
+      loadMoreButtonComponent.removeElement();
     }
   });
-};
+}
