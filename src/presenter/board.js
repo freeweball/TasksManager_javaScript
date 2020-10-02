@@ -7,6 +7,8 @@ import TaskEditView from "../view/task-edit.js";
 import LoadMoreButtonView from "../view/load-more-button.js";
 import {render, RenderPosition} from "../utils/render.js";
 
+const TASK_COUNT_PER_STEP = 8;
+
 export default class Board {
     constructor(boardContainer) {
         this._boardContainer = boardContainer;
@@ -20,6 +22,11 @@ export default class Board {
     init(boardTasks) {
         // Метод для инициализации (начала работы) модуля
         this._boardTasks = boardTasks.slice();
+
+        render(this._boardContainer, this._boardComponent, RenderPosition.BEFOREEND);
+        render(this._boardComponent, this._taskListComponent, RenderPosition.BEFOREEND);
+
+        this._renderBoard();
     }
 
     _renderort() {
@@ -31,7 +38,9 @@ export default class Board {
     }
 
     _renderTasks() {
+        this._renderTasks(from, to) {
         // Метод для рендеринга N-задач за раз
+        }
     }
 
     _renderNoTasks() {
@@ -44,5 +53,17 @@ export default class Board {
 
     _renderBoard() {
         // Метод для инициализации (начала работы) модуля
+        if (this._boardTasks.every((task) => task.isArchive)) {
+            this._renderNoTasks();
+            return;
+          }
+      
+          this._renderSort();
+      
+          this._renderTasks(0, Math.min(this._boardTasks.length, TASK_COUNT_PER_STEP));
+      
+          if (this._boardTasks.length > TASK_COUNT_PER_STEP) {
+            this._renderLoadMoreButton();
+          }
     }
 }
