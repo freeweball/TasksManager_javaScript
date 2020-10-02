@@ -29,7 +29,7 @@ export default class Board {
         this._renderBoard();
     }
 
-    _renderort() {
+    _renderSort() {
         // Метод для рендеринга сортировки
         render(this._boardComponent, this._sortComponent, RenderPosition.AFTERBEGIN);
     }
@@ -73,7 +73,6 @@ export default class Board {
         this._boardTasks
             .slice(from, to)
             .forEach((boardTask) => this._renderTask(boardTask));
-        }
     }
 
     _renderNoTasks() {
@@ -102,6 +101,14 @@ export default class Board {
         });
     }
 
+    _renderTaskList() {
+        this._renderTasks(0, Math.min(this._boardTasks.length, TASK_COUNT_PER_STEP));
+
+        if (this._boardTasks.length > TASK_COUNT_PER_STEP) {
+            this._renderLoadMoreButton();
+        }
+    }
+
     _renderBoard() {
         // Метод для инициализации (начала работы) модуля
         if (this._boardTasks.every((task) => task.isArchive)) {
@@ -110,11 +117,6 @@ export default class Board {
           }
       
           this._renderSort();
-      
-          this._renderTasks(0, Math.min(this._boardTasks.length, TASK_COUNT_PER_STEP));
-      
-          if (this._boardTasks.length > TASK_COUNT_PER_STEP) {
-            this._renderLoadMoreButton();
-          }
+          this._renderTaskList();
     }
 }
