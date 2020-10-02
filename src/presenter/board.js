@@ -10,113 +10,105 @@ import {render, RenderPosition, replace, remove} from "../utils/render.js";
 const TASK_COUNT_PER_STEP = 8;
 
 export default class Board {
-    constructor(boardContainer) {
-        this._boardContainer = boardContainer;
+  constructor(boardContainer) {
+    this._boardContainer = boardContainer;
+    this._renderedTaskCount = TASK_COUNT_PER_STEP;
 
-        this._boardComponent = new BoardView();
-        this._sortComponent = new SortView();
-        this._taskListComponent = new TaskListView();
-        this._noTaskComponent = new NoTaskView();
-    }
+    this._boardComponent = new BoardView();
+    this._sortComponent = new SortView();
+    this._taskListComponent = new TaskListView();
+    this._noTaskComponent = new NoTaskView();
+    this._loadMoreButtonComponent = new LoadMoreButtonView();
 
-    init(boardTasks) {
-        // Метод для инициализации (начала работы) модуля
-        this._boardTasks = boardTasks.slice();
+    this._handleLoadMoreButtonClick = this._handleLoadMoreButtonClick.bind(this);
+  }
 
-        render(this._boardContainer, this._boardComponent, RenderPosition.BEFOREEND);
-        render(this._boardComponent, this._taskListComponent, RenderPosition.BEFOREEND);
+  init(boardTasks) {
+    this._boardTasks = boardTasks.slice();
 
-        this._renderBoard();
-    }
+    render(this._boardContainer, this._boardComponent, RenderPosition.BEFOREEND);
+    render(this._boardComponent, this._taskListComponent, RenderPosition.BEFOREEND);
 
-    _renderSort() {
-        // Метод для рендеринга сортировки
-        render(this._boardComponent, this._sortComponent, RenderPosition.AFTERBEGIN);
-    }
+    this._renderBoard();
+  }
 
-    _renderTask(task) {
-        // Метод для создания и рендеринга компонетов задачи
-        const taskComponent = new TaskView(task);
-        const taskEditComponent = new TaskEditView(task);
+  _renderSort() {
+    render(this._boardComponent, this._sortComponent, RenderPosition.AFTERBEGIN);
+  }
 
-        const replaceCardToForm = () => {
-        replace(taskEditComponent, taskComponent);
-        };
+  _renderTask(task) {
+    const taskComponent = new TaskView(task);
+    const taskEditComponent = new TaskEditView(task);
 
-        const replaceFormToCard = () => {
-        replace(taskComponent, taskEditComponent);
-        };
+    const replaceCardToForm = () => {
+      replace(taskEditComponent, taskComponent);
+    };
 
-        const onEscKeyDown = (evt) => {
-            if (evt.key === `Escape` || evt.key === `Esc`) {
-                evt.preventDefault();
-                replaceFormToCard();
-                document.removeEventListener(`keydown`, onEscKeyDown);
-            }
-        };
+    const replaceFormToCard = () => {
+      replace(taskComponent, taskEditComponent);
+    };
 
-        taskComponent.setEditClickHandler(() => {
-        replaceCardToForm();
-        document.addEventListener(`keydown`, onEscKeyDown);
-        });
-
-        taskEditComponent.setFormSubmitHandler(() => {
+    const onEscKeyDown = (evt) => {
+      if (evt.key === `Escape` || evt.key === `Esc`) {
+        evt.preventDefault();
         replaceFormToCard();
         document.removeEventListener(`keydown`, onEscKeyDown);
-        });
+      }
+    };
 
-        render(this._taskListComponent, taskComponent, RenderPosition.BEFOREEND);
+    taskComponent.setEditClickHandler(() => {
+      replaceCardToForm();
+      document.addEventListener(`keydown`, onEscKeyDown);
+    });
+
+    taskEditComponent.setFormSubmitHandler(() => {
+      replaceFormToCard();
+      document.removeEventListener(`keydown`, onEscKeyDown);
+    });
+
+    render(this._taskListComponent, taskComponent, RenderPosition.BEFOREEND);
+  }
+
+  _renderTasks(from, to) {
+    this._boardTasks
+      .slice(from, to)
+      .forEach((boardTask) => this._renderTask(boardTask));
+  }
+
+  _renderNoTasks() {
+    render(this._boardComponent, this._noTaskComponent, RenderPosition.AFTERBEGIN);
+  }
+
+  _handleLoadMoreButtonClick() {
+    this._renderTasks(this._renderedTaskCount, this._renderedTaskCount + TASK_COUNT_PER_STEP);
+    this._renderedTaskCount += TASK_COUNT_PER_STEP;
+
+    if (this._renderedTaskCount >= this._boardTasks.length) {
+      remove(this._loadMoreButtonComponent);
+    }
+  }
+
+  _renderLoadMoreButton() {
+    render(this._boardComponent, this._loadMoreButtonComponent, RenderPosition.BEFOREEND);
+
+    this._loadMoreButtonComponent.setClickHandler(this._handleLoadMoreButtonClick);
+  }
+
+  _renderTaskList() {
+    this._renderTasks(0, Math.min(this._boardTasks.length, TASK_COUNT_PER_STEP));
+
+    if (this._boardTasks.length > TASK_COUNT_PER_STEP) {
+      this._renderLoadMoreButton();
+    }
+  }
+
+  _renderBoard() {
+    if (this._boardTasks.every((task) => task.isArchive)) {
+      this._renderNoTasks();
+      return;
     }
 
-    _renderTasks(from, to) {
-        // Метод для рендеринга N-задач за раз
-        this._boardTasks
-            .slice(from, to)
-            .forEach((boardTask) => this._renderTask(boardTask));
-    }
-
-    _renderNoTasks() {
-        // Метод для рендеринга N-задач за раз
-        render(this._boardComponent, this._noTaskComponent, RenderPosition.AFTERBEGIN);
-    }
-
-    _renderLoadMoreButton() {
-        // Метод для отрисовки компонетов задачи
-        let renderedTaskCount = TASK_COUNT_PER_STEP;
-
-        const loadMoreButtonComponent = new LoadMoreButtonView();
-
-        render(this._boardComponent, loadMoreButtonComponent, RenderPosition.BEFOREEND);
-
-        loadMoreButtonComponent.setClickHandler(() => {
-            this._boardTasks
-                .slice(renderedTaskCount, renderedTaskCount + TASK_COUNT_PER_STEP)
-                .forEach((boardTask) => this._renderTask(boardTask));
-
-            renderedTaskCount += TASK_COUNT_PER_STEP;
-
-            if (renderedTaskCount >= this._boardTasks.length) {
-                remove(loadMoreButtonComponent);
-            }
-        });
-    }
-
-    _renderTaskList() {
-        this._renderTasks(0, Math.min(this._boardTasks.length, TASK_COUNT_PER_STEP));
-
-        if (this._boardTasks.length > TASK_COUNT_PER_STEP) {
-            this._renderLoadMoreButton();
-        }
-    }
-
-    _renderBoard() {
-        // Метод для инициализации (начала работы) модуля
-        if (this._boardTasks.every((task) => task.isArchive)) {
-            this._renderNoTasks();
-            return;
-          }
-      
-          this._renderSort();
-          this._renderTaskList();
-    }
+    this._renderSort();
+    this._renderTaskList();
+  }
 }
