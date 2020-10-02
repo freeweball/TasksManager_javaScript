@@ -31,20 +31,24 @@ export default class Board {
 
     _renderort() {
         // Метод для рендеринга сортировки
+        render(this._boardComponent, this._sortComponent, RenderPosition.AFTERBEGIN);
     }
 
-    _renderTask() {
+    _renderTask(task) {
         // Метод для создания и рендеринга компонетов задачи
     }
 
-    _renderTasks() {
-        this._renderTasks(from, to) {
+    _renderTasks(from, to) {
         // Метод для рендеринга N-задач за раз
+        this._boardTasks
+            .slice(from, to)
+            .forEach((boardTask) => this._renderTask(boardTask));
         }
     }
 
     _renderNoTasks() {
         // Метод для рендеринга N-задач за раз
+        render(this._boardComponent, this._noTaskComponent, RenderPosition.AFTERBEGIN);
     }
 
     _renderLoadMoreButton() {
