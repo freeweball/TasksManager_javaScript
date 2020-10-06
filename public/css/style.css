@@ -154,6 +154,7 @@ body {
   outline: none;
   text-decoration: none;
   color: #000;
+  transition: opacity 0.2s;
 }
 
 .board__filter::before {
@@ -170,11 +171,18 @@ body {
   transition: 0.5s;
 }
 
-.board__filter:hover.board__filter::before,
 .board__filter:focus.board__filter::before {
   background-color: #000;
   transform: translateX(-50%);
   width: 100%;
+}
+
+.board__filter:hover {
+  opacity: 0.5;
+}
+
+.board__filter:focus {
+  opacity: 1;
 }
 
 .board__tasks {
