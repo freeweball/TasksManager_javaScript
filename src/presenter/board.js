@@ -31,6 +31,9 @@ export default class Board {
 
   init(boardTasks) {
     this._boardTasks = boardTasks.slice();
+    // 1. В отличии от сортировки по любому параметру,
+    // исходный порядок можно сохранить только одним способом -
+    // сохранив исходный массив:
     this._sourcedBoardTasks = boardTasks.slice();
 
     render(this._boardContainer, this._boardComponent, RenderPosition.BEFOREEND);
@@ -41,11 +44,14 @@ export default class Board {
 
   _handleTaskChange(updatedTask) {
     this._boardTasks = updateItem(this._boardTasks, updatedTask);
-    this._sourceBoardTasks = updateItem(this._sourceBoardTasks, updatedTask);
+    this._sourcedBoardTasks = updateItem(this._sourcedBoardTasks, updatedTask);
     this._taskPresenter[updatedTask.id].init(updatedTask);
   }
 
   _sortTasks(sortType) {
+    // 2. Этот исходный массив задач необходим,
+    // потому что для сортировки мы будем мутировать
+    // массив в свойстве _boardTasks
     switch (sortType) {
       case SortType.DATE_UP:
         this._boardTasks.sort(sortTaskUp);
@@ -54,6 +60,8 @@ export default class Board {
         this._boardTasks.sort(sortTaskDown);
         break;
       default:
+        // 3. А когда пользователь захочет "вернуть всё, как было",
+        // мы просто запишем в _boardTasks исходный массив
         this._boardTasks = this._sourcedBoardTasks.slice();
     }
 
@@ -110,7 +118,7 @@ export default class Board {
     Object
       .values(this._taskPresenter)
       .forEach((presenter) => presenter.destroy());
-      this._taskPresenter = {};
+    this._taskPresenter = {};
     this._renderedTaskCount = TASK_COUNT_PER_STEP;
   }
 
