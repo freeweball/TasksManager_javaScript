@@ -1,7 +1,6 @@
 import TaskView from "../view/task.js";
 import TaskEditView from "../view/task-edit.js";
 import {render, RenderPosition, replace, remove} from "../utils/render.js";
-import { addDevServerEntrypoints } from "webpack-dev-server";
 
 export default class Task {
   constructor(taskListContainer) {
@@ -28,15 +27,14 @@ export default class Task {
     this._taskEditComponent.setFormSubmitHandler(this._handleFormSubmit);
 
     if (prevTaskComponent === null || prevTaskEditComponent === null) {
-        render(this._taskListContainer, this._taskComponent, RenderPosition.BEFOREEND);
-        
-        return;
+      render(this._taskListContainer, this._taskComponent, RenderPosition.BEFOREEND);
+      return;
     }
-    
+
     // Проверка на наличие в DOM необходима,
     // чтобы не пытаться заменить то, что не было отрисовано
     if (this._taskListContainer.getElement().contains(prevTaskComponent.getElement())) {
-        replace(this._taskComponent, prevTaskComponent);
+      replace(this._taskComponent, prevTaskComponent);
     }
 
     if (this._taskListContainer.getElement().contains(prevTaskEditComponent.getElement())) {
