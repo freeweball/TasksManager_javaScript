@@ -1,7 +1,6 @@
 import AbstractView from "./abstract.js";
 import {COLORS} from "../const.js";
 import {isTaskExpired, isTaskRepeating, humanizeTaskDueDate} from "../utils/task.js";
-import {renderTemplate, RenderPosition} from "../utils/render.js";
 
 const BLANK_TASK = {
   color: COLORS[0],
@@ -20,11 +19,11 @@ const BLANK_TASK = {
   isFavorite: false
 };
 
-const createTaskEditDateTemplate = (dueDate, isDueDate) => {
+const createTaskEditDateTemplate = (dueDate) => {
   return `<button class="card__date-deadline-toggle" type="button">
-      date: <span class="card__date-status">${isDueDate ? `yes` : `no`}</span>
+      date: <span class="card__date-status">${dueDate !== null ? `yes` : `no`}</span>
     </button>
-    ${isDueDate ? `<fieldset class="card__date-deadline">
+    ${dueDate !== null ? `<fieldset class="card__date-deadline">
       <label class="card__input-deadline-wrap">
         <input
           class="card__date"
@@ -38,11 +37,11 @@ const createTaskEditDateTemplate = (dueDate, isDueDate) => {
   `;
 };
 
-const createTaskEditRepeatingTemplate = (repeating, isRepeating) => {
+const createTaskEditRepeatingTemplate = (repeating) => {
   return `<button class="card__repeat-toggle" type="button">
-    repeat:<span class="card__repeat-status">${isRepeating ? `yes` : `no`}</span>
+    repeat:<span class="card__repeat-status">${isTaskRepeating(repeating) ? `yes` : `no`}</span>
   </button>
-  ${isRepeating ? `<fieldset class="card__repeat-days">
+  ${isTaskRepeating(repeating) ? `<fieldset class="card__repeat-days">
     <div class="card__repeat-days-inner">
       ${Object.entries(repeating).map(([day, repeat]) => `<input
         class="visually-hidden card__repeat-day-input"
@@ -75,19 +74,18 @@ const createTaskEditColorsTemplate = (currentColor) => {
   >`).join(``);
 };
 
-const createTaskEditTemplate = (task, option) => {
+const createTaskEditTemplate = (task) => {
   const {color, description, dueDate, repeating} = task;
-  const {isDueDate, isRepeating} = option;
 
   const deadlineClassName = isTaskExpired(dueDate)
     ? `card--deadline`
     : ``;
-  const dateTemplate = createTaskEditDateTemplate(dueDate, isDueDate);
+  const dateTemplate = createTaskEditDateTemplate(dueDate);
 
-  const repeatingClassName = isRepeating
+  const repeatingClassName = isTaskRepeating(repeating)
     ? `card--repeat`
     : ``;
-  const repeatingTemplate = createTaskEditRepeatingTemplate(repeating, isRepeating);
+  const repeatingTemplate = createTaskEditRepeatingTemplate(repeating);
 
   const colorsTemplate = createTaskEditColorsTemplate(color);
 
@@ -135,81 +133,12 @@ export default class TaskEdit extends AbstractView {
   constructor(task) {
     super();
     this._task = task || BLANK_TASK;
-    this._option = {
-      isDueDate: Boolean(this._task.dueDate),
-      isRepeating: isTaskRepeating(this._task.repeating)
-    };
 
     this._formSubmitHandler = this._formSubmitHandler.bind(this);
-
-    this._enableDueDateToggler();
-    this._enableRepeatingToggler();
   }
 
   getTemplate() {
-    return createTaskEditTemplate(this._task, this._option);
-  }
-
-  _enableDueDateToggler() {
-    const element = this.getElement();
-
-    const dueDateToggleHandler = (evt) => {
-      evt.preventDefault();
-
-      element.querySelector(`.card__date-deadline-toggle`).remove();
-
-      if (element.querySelector(`.card__date-deadline`)) {
-        element.querySelector(`.card__date-deadline`).remove();
-      }
-
-      const dateTemplate = createTaskEditDateTemplate(this._task.dueDate, !this._option.isDuedate);
-
-      renderTemplate(element.querySelector(`.card__dates`), dateTemplate, RenderPosition.AFTERBEGIN);
-
-      this._option.isDueDate = !this._option.isDueDate;
-
-      element
-        .querySelector(`.card__date-deadline-toggle`)
-        .addEventListener(`click`, dueDateToggleHandler);
-    };
-
-    element
-      .querySelector(`.card__date-deadline-toggle`)
-      .addEventListener(`click`, dueDateToggleHandler);
-  }
-
-  _enableRepeatingToggler() {
-    const element = this.getElement();
-
-    const repeatingToggleHandler = (evt) => {
-      evt.preventDefault();
-
-      element.querySelector(`.card__repeat-toggle`).remove();
-
-      if (element.querySelector(`.card__repeat-days`)) {
-        element.querySelector(`.card__repeat-days`).remove();
-      }
-
-      if (!this._option.isRepeating) {
-        element.classList.add(`card--repeat`);
-      } else {
-        element.classList.remove(`card--repeat`);
-      }
-
-      const repeatingTemplate = createTaskEditRepeatingTemplate(this._task.repeating, !this._option.isRepeating);
-
-      renderTemplate(element.querySelector(`.card__dates`), repeatingTemplate, RenderPosition.BEFOREEND);
-
-      this._option.isRepeating = !this._option.isReapiting;
-
-      element
-        .querySelector(`.card__repeat-toggle`)
-        .addEventListener(`click`, repeatingToggleHandler);
-    }
-
-    element
-        .querySelector(`.card__repeat-toggle`)
-        .addEventListener(`click`, repeatingToggleHandler);
+    return createTaskEditTemplate(this._task);
   }
 
   _formSubmitHandler(evt) {
