@@ -5,7 +5,7 @@ import FilterPresenter from "./presenter/filter.js";
 import TasksModel from "./model/tasks.js";
 import FilterModel from "./model/filter.js";
 import {render, RenderPosition} from "./utils/render.js";
-import {MenuItem} from "./const.js";
+import {MenuItem, UpdateType, FilterType} from "./const.js";
 
 const TASK_COUNT = 22;
 
@@ -37,16 +37,21 @@ const handleSiteMenuClick = (menuItem) => {
             // Показать доску
             // Показать форму добавления новой задачи
             // Убрать выделение с ADD NEW TASK после сохранения
+            boardPresenter.destroy();
+            filterModel.setFilter(UpdateType.MAJOR, FilterType.ALL);
+            boardPresenter.init();
             boardPresenter.createTask(handleTaskNewFormClose);
             siteMenuComponent.getElement().querySelector(`[value=${MenuItem.TASKS}]`).disabled = true;
             break;
         case MenuItem.TASKS:
             // Показать доску
             // Скрыть статистику
+            boardPresenter.init();
             break;
         case MenuItem.STATISTICS:
             // Скрыть доску
             // Показать статистику
+            boardPresenter.destroy();
             break;
     }
 };
