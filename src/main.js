@@ -5,7 +5,7 @@ import BoardPresenter from "./presenter/board.js";
 import FilterPresenter from "./presenter/filter.js";
 import TasksModel from "./model/tasks.js";
 import FilterModel from "./model/filter.js";
-import {render, RenderPosition} from "./utils/render.js";
+import {render, RenderPosition, remove} from "./utils/render.js";
 import {MenuItem, UpdateType, FilterType} from "./const.js";
 
 const TASK_COUNT = 22;
@@ -27,40 +27,35 @@ const boardPresenter = new BoardPresenter(siteMainElement, tasksModel, filterMod
 const filterPresenter = new FilterPresenter(siteMainElement, filterModel, tasksModel);
 
 const handleTaskNewFormClose = () => {
-    siteMenuComponent.getElement().querySelector(`[value=${MenuItem.TASKS}]`).disabled = false;
-    siteMenuComponent.setMenuItem(MenuItem.TASKS);
+  siteMenuComponent.getElement().querySelector(`[value=${MenuItem.TASKS}]`).disabled = false;
+  siteMenuComponent.setMenuItem(MenuItem.TASKS);
 };
 
+let statisticsComponent = null;
+
 const handleSiteMenuClick = (menuItem) => {
-    switch(menuItem) {
-        case MenuItem.ADD_NEW_TASK:
-            // Скрыть статистику
-            // Показать доску
-            // Показать форму добавления новой задачи
-            // Убрать выделение с ADD NEW TASK после сохранения
-            boardPresenter.destroy();
-            filterModel.setFilter(UpdateType.MAJOR, FilterType.ALL);
-            boardPresenter.init();
-            boardPresenter.createTask(handleTaskNewFormClose);
-            siteMenuComponent.getElement().querySelector(`[value=${MenuItem.TASKS}]`).disabled = true;
-            break;
-        case MenuItem.TASKS:
-            // Показать доску
-            // Скрыть статистику
-            boardPresenter.init();
-            break;
-        case MenuItem.STATISTICS:
-            // Скрыть доску
-            // Показать статистику
-            boardPresenter.destroy();
-            break;
-    }
+  switch (menuItem) {
+    case MenuItem.ADD_NEW_TASK:
+      remove(statisticsComponent);
+      boardPresenter.destroy();
+      filterModel.setFilter(UpdateType.MAJOR, FilterType.ALL);
+      boardPresenter.init();
+      boardPresenter.createTask(handleTaskNewFormClose);
+      siteMenuComponent.getElement().querySelector(`[value=${MenuItem.TASKS}]`).disabled = true;
+      break;
+    case MenuItem.TASKS:
+      boardPresenter.init();
+      remove(statisticsComponent);
+      break;
+    case MenuItem.STATISTICS:
+      boardPresenter.destroy();
+      statisticsComponent = new StatisticsView(tasksModel.getTasks());
+      render(siteMainElement, statisticsComponent, RenderPosition.BEFOREEND);
+      break;
+  }
 };
 
 siteMenuComponent.setMenuClickHandler(handleSiteMenuClick);
 
 filterPresenter.init();
-// Для удобства отладки скроем доску
-// boardPresenter.init();
-// и отобразим сразу статистику
-render(siteMainElement, new StatisticsView(tasksModel.getTasks()), RenderPosition.BEFOREEND);
+boardPresenter.init();
