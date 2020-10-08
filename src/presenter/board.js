@@ -46,7 +46,7 @@ export default class Board {
     this._renderBoard();
   }
 
-  createTasks() {
+  createTask() {
     this._currentSortType = SortType.DEFAULT;
     this._filtermodel.setFilter(UpdateType.MAJOR, FilterType.ALL);
     this._taskNewPresenter.init();
