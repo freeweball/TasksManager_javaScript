@@ -6,7 +6,7 @@ import LoadMoreButtonView from "../view/load-more-button.js";
 import TaskPresenter from "./task.js";
 import {render, RenderPosition, remove} from "../utils/render.js";
 import {sortTaskUp, sortTaskDown} from "../utils/task.js";
-import {SortType} from "../const.js";
+import {SortType, UpdateType, UserAction} from "../const.js";
 
 const TASK_COUNT_PER_STEP = 8;
 
@@ -35,7 +35,7 @@ export default class Board {
 
   init() {
     render(this._boardContainer, this._boardComponent, RenderPosition.BEFOREEND);
-    render(this._boardComponent, this._taskListComponent. RenderPosition.BEFOREEND);
+    render(this._boardComponent, this._taskListComponent, RenderPosition.BEFOREEND);
 
     this._renderBoard();
   }
@@ -58,19 +58,33 @@ export default class Board {
   }
 
   _handleViewAction(actionType, updateType, update) {
-    console.log(actionType, updateType, update);
-    // Здесь будем вызывать обновление модели.
-    // actionType - действие пользователя, нужно чтобы понять, какой метод модели вызвать
-    // updateType - тип изменений, нужно чтобы понять, что после нужно обновить
-    // update - обновленные данные
+    switch (actionType) {
+      case UserAction.UPDATE_TASK:
+        this._tasksModel.updateTask(updateType, update);
+        break;
+      case UserAction.ADD_TASK:
+        this._tasksModel.addTask(updateType, update);
+        break;
+      case UserAction.DELETE_TASK:
+        this._tasksModel.deleteTask(updateType, update);
+        break;
+    }
   }
 
   _handleModelEvent(updateType, data) {
-    console.log(updateType, data);
     // В зависимости от типа изменений решаем, что делать:
-    // - обновить часть списка (например, когда поменялось описание)
-    // - обновить список (например, когда задача ушла в архив)
-    // - обновить всю доску (например, при переключении фильтра)
+    switch (updateType) {
+      case UpdateType.PATCH:
+        // - обновить часть списка (например, когда поменялось описание)
+        this._taskPresenter[data.id].init(data);
+        break;
+      case UpdateType.MINOR:
+        // - обновить список (например, когда задача ушла в архив)
+        break;
+      case UpdateType.MAJOR:
+        // - обновить всю доску (например, при переключении фильтра)
+        break;
+    }
   }
 
   _handleSortTypeChange(sortType) {
@@ -78,7 +92,7 @@ export default class Board {
       return;
     }
 
-    this._currentSortType(sortType);
+    this._currentSortType = sortType;
     this._clearTaskList();
     this._renderTaskList();
   }
@@ -104,11 +118,11 @@ export default class Board {
 
   _handleLoadMoreButtonClick() {
     const taskCount = this._getTasks().length;
-    const newRenderTaskCount = Math.min(taskCount, this._renderTaskCount + TASK_COUNT_PER_STEP);
+    const newRenderedTaskCount = Math.min(taskCount, this._renderedTaskCount + TASK_COUNT_PER_STEP);
     const tasks = this._getTasks().slice(this._renderedTaskCount, newRenderedTaskCount);
 
-    this._renderTasks(task);
-    this._renderedTaskCount = newRenderTaskCount;
+    this._renderTasks(tasks);
+    this._renderedTaskCount = newRenderedTaskCount;
 
     if (this._renderedTaskCount >= taskCount) {
       remove(this._loadMoreButtonComponent);
@@ -131,7 +145,7 @@ export default class Board {
 
   _renderTaskList() {
     const taskCount = this._getTasks().length;
-    const tasks = this.getTasks().slice(0, Math.min(taskCount, TASK_COUNT_PER_STEP));
+    const tasks = this._getTasks().slice(0, Math.min(taskCount, TASK_COUNT_PER_STEP));
 
     this._renderTasks(tasks);
 
