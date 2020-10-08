@@ -1,4 +1,4 @@
-import AbstractView from "./abstract.js";
+import SmartView from "./smart.js";
 import {COLORS} from "../const.js";
 import {isTaskExpired, isTaskRepeating, humanizeTaskDueDate} from "../utils/task.js";
 
@@ -140,7 +140,7 @@ export default class TaskEdit extends SmartView {
     this._descriptionInputHandler = this._descriptionInputHandler.bind(this);
     this._dueDateToggleHandler = this._dueDateToggleHandler.bind(this);
     this._repeatingToggleHandler = this._repeatingToggleHandler.bind(this);
-    this._repeatingChageHandler = this._repeatingChangeHandler.bind(this);
+    this._repeatingChangeHandler = this._repeatingChangeHandler.bind(this);
     this._colorChangeHandler = this._colorChangeHandler.bind(this);
 
     this._setInnerHandlers();
@@ -148,7 +148,7 @@ export default class TaskEdit extends SmartView {
 
   reset(task) {
     this.updateData(
-      TaskEdit.parseTaskToData(task)
+        TaskEdit.parseTaskToData(task)
     );
   }
 
@@ -172,21 +172,25 @@ export default class TaskEdit extends SmartView {
       .querySelector(`.card__text`)
       .addEventListener(`input`, this._descriptionInputHandler);
 
-      if (this._data.isRepeatin) {
-        this._getElement()
+    if (this._data.isRepeating) {
+      this.getElement()
         .querySelector(`.card__repeat-days-inner`)
         .addEventListener(`change`, this._repeatingChangeHandler);
-      }
+    }
 
-      this.getElement()
-        .querySelector(`.card__colors-wrap`)
-        .addEventListener(`change`, this._colorChangeHandler);
+    this.getElement()
+      .querySelector(`.card__colors-wrap`)
+      .addEventListener(`change`, this._colorChangeHandler);
   }
 
   _dueDateToggleHandler(evt) {
     evt.preventDefault();
     this.updateData({
       isDueDate: !this._data.isDueDate,
+      // Логика следующая: если выбор даты нужно показать,
+      // то есть когда "!this._data.isDueDate === true",
+      // тогда isRepeating должно быть строго false,
+      // что достигается логическим оператором &&
       isRepeating: !this._data.isDueDate && false
     });
   }
@@ -195,7 +199,8 @@ export default class TaskEdit extends SmartView {
     evt.preventDefault();
     this.updateData({
       isRepeating: !this._data.isRepeating,
-      isDueDate: !this._data.isReapiting && false
+      // Аналогично, но наоборот, для повторения
+      isDueDate: !this._data.isRepeating && false
     });
   }
 
@@ -210,9 +215,9 @@ export default class TaskEdit extends SmartView {
     evt.preventDefault();
     this.updateData({
       repeating: Object.assign(
-        {},
-        this._data.repeating,
-        {[evt.target.value]: evt.target.checked}
+          {},
+          this._data.repeating,
+          {[evt.target.value]: evt.target.checked}
       )
     });
   }
